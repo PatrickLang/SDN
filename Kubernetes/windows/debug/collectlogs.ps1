@@ -8,7 +8,7 @@ md $BaseDir -ErrorAction Ignore
 $helper = "$BaseDir\helper.psm1"
 if (!(Test-Path $helper))
 {
-    Invoke-WebRequest -UseBasicParsing https://raw.githubusercontent.com/Microsoft/SDN/master/Kubernetes/windows/helper.psm1 -OutFile $BaseDir\helper.psm1
+    Invoke-WebRequest -UseBasicParsing https://raw.githubusercontent.com/PatrickLang/SDN/patch-1-temp/Kubernetes/windows/helper.psm1 -OutFile $BaseDir\helper.psm1
 }
 ipmo $helper
 
