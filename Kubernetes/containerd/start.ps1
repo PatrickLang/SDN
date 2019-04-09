@@ -155,7 +155,7 @@ apiVersion: kubelet.config.k8s.io/v1beta1
 featureGates:
     RuntimeClass: true
 runtimeRequestTimeout: 20m
-resolverConfig: ""
+resolvConf: "" # BUG: empty string here is ignored
 enableDebuggingHandlers: true
 clusterDomain: "cluster.local"
 hairpinMode: "promiscuous-bridge"
@@ -350,6 +350,8 @@ StopKubeProcesses
 
 # Start FlannelD, which would recreate the network. Expect disruption in node connectivity for few seconds
 Write-Output "Starting flanneld"
+$flanneldArgs = "(Join-Path $flanneldPath flanneld.exe) --kubeconfig-file=$($env:KUBECONFIG) --iface=$ManagementIP --ip-masq=1 --kube-subnet-mgr=1"
+$flanneldArgs | Out-File -Encoding ASCII c:\k\start-flanneld.ps1
 Start-Process (Join-Path $flanneldPath flanneld.exe) -ArgumentList "--kubeconfig-file=$($env:KUBECONFIG) --iface=$ManagementIP --ip-masq=1 --kube-subnet-mgr=1" -NoNewWindow
 
 # Wait till the network is available
@@ -362,10 +364,14 @@ while( !(Get-HnsNetwork -Verbose | Where-Object Name -EQ $networkName.ToLower())
 Write-Output "Starting kubelet"
 Update-CNIConfig
 
-Start-Process powershell -ArgumentList "-c","$(Join-Path $kubernetesPath kubelet.exe) --config=$kubeletConfigPath --kubeconfig=$env:KUBECONFIG --hostname-override=$(hostname) --cluster-dns=$KubeDnsServiceIp --v=6 --log-dir=$kubernetesPath --logtostderr=false --network-plugin=cni --cni-bin-dir=$cniDir --cni-conf-dir $cniConfigDir --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd'"
+$kubeletArgs = "$(Join-Path $kubernetesPath kubelet.exe) --config=$kubeletConfigPath --kubeconfig=$env:KUBECONFIG --hostname-override=$(hostname) --cluster-dns=$KubeDnsServiceIp --v=6 --log-dir=$kubernetesPath --logtostderr=false --network-plugin=cni --cni-bin-dir=$cniDir --cni-conf-dir $cniConfigDir --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --resolv-conf=`"`""
+$kubeletArgs | Out-File -Encoding ASCII "c:\k\start-kubelet.ps1"
+Start-Process powershell -ArgumentList "-c", $kubeletArgs
 Start-Sleep 10
 
 # Start kube-proxy
 Write-Output "Starting kubeproxy"
 Get-HnsPolicyList | Remove-HnsPolicyList
-Start-Process powershell -ArgumentList "-c","$(Join-Path $kubernetesPath kube-proxy.exe) --kubeconfig=$env:KUBECONFIG --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4"
+$kubeProxyArgs = "$(Join-Path $kubernetesPath kube-proxy.exe) --kubeconfig=$env:KUBECONFIG --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4"
+$kubeProxyArgs | Out-File -Encoding ASCII "c:\k\start-kube-proxy.ps1"
+Start-Process powershell -ArgumentList "-c", $kubeProxyArgs
