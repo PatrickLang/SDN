@@ -6,7 +6,7 @@ Param
     [parameter(ParameterSetName='Default', Mandatory = $false, HelpMessage='Kubernetes cluster cidr')] [string]$ClusterCIDR,
     [parameter(ParameterSetName='Default', Mandatory = $false, HelpMessage='Kubernetes pod service cidr')] [string]$ServiceCIDR,
     [parameter(ParameterSetName='Default', Mandatory = $false, HelpMessage='Kubernetes DNS Ip')] [string]$KubeDnsServiceIP,
-    [parameter(ParameterSetName='Default', Mandatory = $false, HelpMessage='Kubernetes version to download')] [string]$KubernetesVersion = "1.13.3",
+    [parameter(ParameterSetName='Default', Mandatory = $false, HelpMessage='Kubernetes version to download')] [string]$KubernetesVersion = "1.14.1",
     [parameter(ParameterSetName='Default', Mandatory = $false, HelpMessage='Skip downloading binaries')] [switch] $SkipInstall,
 
     [parameter(ParameterSetName='OnlyInstall', Mandatory = $true)] [switch] $OnlyInstall
