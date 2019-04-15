@@ -63,6 +63,7 @@ Function DownloadAllFiles() {
     DownloadFile "https://github.com/$GithubSDNRepository/raw/master/Kubernetes/flannel/l2bridge/cni/flannel.exe" $cniDir\flannel.exe
     DownloadFile "https://github.com/$GithubSDNRepository/raw/master/Kubernetes/flannel/l2bridge/cni/host-local.exe" $cniDir\host-local.exe
     DownloadFile "https://github.com/$GithubSDNRepository/raw/master/Kubernetes/flannel/l2bridge/cni/win-bridge.exe" $cniDir\win-bridge.exe
+    DownloadFile "https://github.com/PatrickLang/windows-container-networking/blob/bins/out/sdnbridge.exe?raw=true" $cniDir\sdnbridge.exe # TODO: switch to upstream release
 
     # download available cri binaries
     if(-not (Test-Path (Join-Path $containerdPath crictl.exe))) {
@@ -215,7 +216,7 @@ Function Update-CNIConfig() {
 "@
     $configJson =  ConvertFrom-Json $jsonSampleConfig
     $configJson.name = $networkName
-    $configJson.delegate.type = "win-bridge"
+    $configJson.delegate.type = "sdnbridge"
     $configJson.delegate.dns.Nameservers[0] = $KubeDnsServiceIP
     $configJson.delegate.dns.Search[0] = $kubeDnsSuffix
 
